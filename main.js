@@ -69,22 +69,65 @@ const contactDataWizard = new Scenes.WizardScene(
     return ctx.wizard.next();
   },
   async (ctx) => {
-    ctx.wizard.state.searchData.remoteWork = ctx.message.text;
+    if (ctx.message.text == "❌ False") {
+      ctx.wizard.state.searchData.remote = "false";
+    }
+    if (ctx.message.text == "✅ True") {
+      ctx.wizard.state.searchData.remote = "true";
+    }
     ctx.reply(
       "Thank you for filling the form we will notify you of current results"
     );
     querryContext = ctx.wizard.state.searchData;
-
+    useQuerriedDataSearch(ctx);
     return ctx.scene.leave();
   }
 );
+let useQuerriedDataSearch = async (ctx) => {
+  let resultString = ``;
+  console.log("LOCATION", querryContext.location);
+  console.log("type of", typeof querryContext.location);
+  console.log("distance", querryContext.distance);
+  console.log("type of", typeof querryContext.distance);
+
+  console.log("remote", querryContext.remote);
+  console.log("type of", typeof querryContext.remote);
+
+  let text = await returnListenerText(querryContext);
+  text.forEach((e) => {
+    resultString += `
+        Title: [${e.title}](${e.link})
+        Company: ${e.company}
+        Location: ${e.location}
+        
+        `;
+  });
+  ctx.replyWithMarkdownV2(resultString);
+
+  setInterval(async () => {
+    let result = await returnListenerText(querryContext);
+    if (typeof result !== "undefined") {
+      result.forEach((e) => {
+        let message = `
+                Title: [${e.title}](${e.link})
+                Company: ${e.company}
+                Location: ${e.location}
+
+                `;
+        bot.telegram.sendMessage(5033076293, message, {
+          parse_mode: "MarkdownV2",
+        });
+      });
+    }
+  }, 5 * 60 * 1000);
+};
 
 const stage = new Scenes.Stage([contactDataWizard]);
 bot.use(stage.middleware());
 
 bot.hears("see", (ctx) => {
   console.log("THE querry context");
-  ctx.reply(JSON.stringify(querryContext));
+  ctx.reply(JSON.stringify(querryContext.location));
 });
 // bot.start((ctx) => {
 //   querryContext.chat_id = ctx.update.message.chat.id;
@@ -196,13 +239,20 @@ bot.hears("/preview", (ctx) => {
 });
 
 bot.hears("/watch", async (ctx) => {
+  console.log("LOCATION", querryContext.location);
+  console.log("type of", typeof querryContext.location);
+  console.log("distance", querryContext.distance);
+  console.log("type of", typeof querryContext.distance);
+
+  console.log("remote", querryContext.remote);
+  console.log("type of", typeof querryContext.remote);
   let checkOfObject = checkObject(querryContext);
   if (checkObject.pass == false) {
     ctx.reply(checkObject.message);
   }
   let resultString = ``;
 
-  let text = await returnListenerText();
+  let text = await returnListenerText(querryContext);
   text.forEach((e) => {
     resultString += `
         Title: [${e.title}](${e.link})
@@ -211,13 +261,15 @@ bot.hears("/watch", async (ctx) => {
         
         `;
   });
-  ctx.replyWithMarkdownV2(resultString);
+  // ctx.replyWithMarkdownV2(resultString);
+  return resultString;
   //   console.log("THE RETURNED TEXT: ", text);
   //   console.log(querryContext.toString());
   //   ctx.reply(querryContext.toString());
 });
 
 let querryContextDEV = { location: "york", distance: "50", remote: "true" };
+
 bot.hears("/watchDEV", async (ctx) => {
   const checkOfObject = checkObject(querryContextDEV);
 

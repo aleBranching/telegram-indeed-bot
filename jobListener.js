@@ -23,7 +23,6 @@ function newResultsFinder(newJSON, oldJSON) {
   data.forEach((element) => {
     let title = element.title;
     let result = titleInArray(title, oldData);
-    // console.log(result);
     if (result != false) {
       newData.push(element);
     }
@@ -41,19 +40,6 @@ function titleInArray(title, jsonData) {
   return false;
 }
 
-let collectionOfNewPosts = {
-  data: [
-    {
-      title: "Housekeeper",
-      link: "https://uk.indeed.com/rc/clk?jk=798fea2b45a8edad&fccid=56d9546f1cfd1573&vjs=3",
-      company: "Vintage",
-      location: "Castleton",
-    },
-  ],
-};
-// const fileUrl = require("file-url");
-
-// RETURNS A PROMISE
 async function run(location, remote, distance) {
   const browser = await puppeteer.launch({ headless: "new" });
   const page = await browser.newPage();
@@ -68,39 +54,18 @@ async function run(location, remote, distance) {
   if (remote == "false") {
     indeedURL = `https://uk.indeed.com/jobs?l=${location}&radius=${distance}&sort=date`;
   }
-  //   const URL = `https://uk.indeed.com/jobs?l=${location}&sc=0kf%253Aattr(DSQF7)%253B&radius=${distance}&sort=date`;
 
   console.log("THE url", indeedURL);
 
   await page.goto(indeedURL);
 
-  //   await page.screenshot({ path: "example.png", fullPage: true });
-  //   await page.screenshot({ path: "example.png", fullPage: true });
-
-  //   const html = await page.content();
-  //   console.log(html);
-  //   const title = await page.evaluate(() => document.title);
-  //   const text = await page.evaluate(() => document.body.innerText);
-  //   const courses = await page.evaluate(() =>
-  //     Array.from(document.querySelectorAll(".cscourse-grid .card"), (e) => ({
-  //       title: e.querySelector(".card-body h3").innerText,
-  //       level: e.querySelector(".level").innerText,
-  //     }))
-  //   );
-
   const jobtxt = await page.evaluate(() => {
-    // let nodeList = document.querySelector(".jobsearch-ResultsList");
     let wholeCard = document.querySelectorAll(".cardOutline.result");
 
-    // nodeList = nodeList.querySelectorAll("span[title]");
     console.log("test");
-    // console.log(nodeList);
     const toArray = Array.from(wholeCard, (e) => {
-      //   console.log("the e:", e);
       let titleDOM = e.querySelector("span[title]");
-      //   return { title: e.innerText, link: e.parentElement.href };
-      //   console.log(titleDOM.innerHTML);
-      //   console.log(titleDOM.parentElement.href);
+
       return {
         title: titleDOM.innerHTML.replace(/[^a-zA-Z0-9]/g, " "),
         link: titleDOM.parentElement.href,
@@ -112,16 +77,11 @@ async function run(location, remote, distance) {
           .innerText.replace(/[^a-zA-Z0-9]/g, " "),
       };
     });
-    // console.log(toArray);
     return toArray;
   });
 
-  //   console.log(jobtxt);
   let newResult = { data: jobtxt, searchedAt: new Date().toLocaleString() };
-  // before new posts finder
-  //   console.log("before new posts");
-  //   this way needs to be done if checking a collection
-  //   let newPosts = { data: newResultsFinder(newResult, oldJSON) };
+
   let newPosts = newResultsFinder(newResult, oldJSON);
 
   if (newPosts.length == 0) {
@@ -130,41 +90,7 @@ async function run(location, remote, distance) {
     return;
   }
 
-  // pushing to collection);
-  //   newPosts.data.forEach((element) => {
-  //     collectionOfNewPosts.data.push(element);
-  //   });
-  //   console.log("newPosts", newPosts);
-  //   console.log("collectionOfNewPosts", collectionOfNewPosts);
-  //   let actualNewPosts = newResultsFinder(newPosts, collectionOfNewPosts);
-  //   if (actualNewPosts.length == 0) {
-  //     await browser.close();
-  //     return;
-  //   }
-  console.log("=================");
-  console.log("THE NEW  JOBS");
-  //   console.log(newPosts);
-  console.log(newPosts);
-  console.log("=================");
   oldJSON.data = oldJSON.data.concat(jobtxt);
-
-  //   fs.readFile(
-  //     path.join(__dirname, "results", "jobResultList.json"),
-  //     "utf8",
-  //     (err, data) => {
-  //       if (err) {
-  //         console.error(err);
-  //         return;
-  //       }
-
-  //     }
-  //   );
-  let JSONstringed = JSON.stringify(newResult);
-  //   fs.writeFile("results/jobResultList.json", JSONstringed, (err) => {
-  //     if (err) {
-  //       console.error(err);
-  //     }
-  //   });
 
   await browser.close();
 
@@ -172,12 +98,3 @@ async function run(location, remote, distance) {
 }
 
 module.exports = run;
-// let result = run("leeds", "false", "50");
-
-// console.log(result);
-
-// run(york, )
-// setInterval(() => {
-//   let result = run("leeds", "false", "50");
-//   console.log(result);
-// }, 60 * 1000);

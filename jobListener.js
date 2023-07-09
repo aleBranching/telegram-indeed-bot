@@ -1,4 +1,6 @@
 const puppeteer = require("puppeteer");
+// const { ConsoleMessage, Page, JSHandle } = require("puppeteer");
+// const chalk = require("chalk");
 const fs = require("fs");
 const path = require("path");
 const { disconnect } = require("process");
@@ -40,19 +42,71 @@ function titleInArray(title, jsonData) {
   return false;
 }
 
-async function run(location, remote, distance) {
+// let innerInnerText = (element) => {
+//   console.log(element);
+//   (child = element.firstChild), (texts = []);
+
+//   while (child) {
+//     if (child.nodeType == 3) {
+//       texts.push(child.data);
+//     }
+//     child = child.nextSibling;
+//   }
+
+//   // while at first an elegant solution was attempted a tired got work the next day brain has decided this monstrosity to make sense to do
+//   // return texts
+//   //   .slice(1)[0]
+//   //   .trim()
+//   //   .split(" ")
+//   //   .slice(1)
+//   //   .join(" ")
+//   //   .replace(/\+/g, "\\+");
+//   return "test";
+// };
+
+async function run(location, remote, distance, searchString) {
   const browser = await puppeteer.launch({ headless: "new" });
   const page = await browser.newPage();
-  page.on("console", (msg) => console.log(msg.text()));
+  // page.on("console", (msg) => console.log(msg.text()));
+  page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
+  // page.on("console", async (msg) => {
+  //   const args = await msg.args();
+  //   args.forEach(async (arg) => {
+  //     const val = await arg.jsonValue();
+  //     // value is serializable
+  //     if (JSON.stringify(val) !== JSON.stringify({})) console.log(val);
+  //     // value is unserializable (or an empty oject)
+  //     // else {
+  //     //   const { type, subtype, description } = arg._remoteObject;
+  //     //   console.log(
+  //     //     `type: ${type}, subtype: ${subtype}, description:\n ${description}`
+  //     //   );
+  //     // }
+  //   });
+  // });
+
   let indeedURL;
+  if (searchString == "false") {
+    if (distance == "25" && remote == "true") {
+      indeedURL = `https://uk.indeed.com/jobs?l=${location}&sc=0kf%253Aattr(DSQF7)%253B&sort=date`;
+    }
+    if (remote == "true") {
+      indeedURL = `https://uk.indeed.com/jobs?l=${location}&sc=0kf%3Aattr%28DSQF7%29%3B&radius=${distance}&sort=date`;
+    }
+    if (remote == "false") {
+      indeedURL = `https://uk.indeed.com/jobs?l=${location}&radius=${distance}&sort=date`;
+    }
+  }
+
+  let ammendedSearchString = searchString.split(" ").join("+");
   if (distance == "25" && remote == "true") {
-    indeedURL = `https://uk.indeed.com/jobs?l=${location}&sc=0kf%253Aattr(DSQF7)%253B&sort=date`;
+    indeedURL = `https://uk.indeed.com/jobs?q=${ammendedSearchString}&l=${location}&sc=0kf%253Aattr(DSQF7)%253B&sort=date`;
   }
   if (remote == "true") {
-    indeedURL = `https://uk.indeed.com/jobs?l=${location}&sc=0kf%3Aattr%28DSQF7%29%3B&radius=${distance}&sort=date`;
+    indeedURL = `https://uk.indeed.com/jobs?q=${ammendedSearchString}&l=${location}&sc=0kf%3Aattr%28DSQF7%29%3B&radius=${distance}&sort=date`;
   }
   if (remote == "false") {
-    indeedURL = `https://uk.indeed.com/jobs?l=${location}&radius=${distance}&sort=date`;
+    indeedURL = `https://uk.indeed.com/jobs?q=${ammendedSearchString}&l=${location}&radius=${distance}&sort=date`;
   }
 
   console.log("THE url", indeedURL);
@@ -60,11 +114,45 @@ async function run(location, remote, distance) {
   await page.goto(indeedURL);
 
   const jobtxt = await page.evaluate(() => {
+    let innerInnerText = (element) => {
+      console.log(element);
+      child = element.firstChild;
+      texts = [];
+
+      while (child) {
+        if (child.nodeType == 3) {
+          texts.push(child.data);
+        }
+        child = child.nextSibling;
+      }
+
+      // while at first an elegant solution was attempted a tired got work the next day brain has decided this monstrosity to make sense to do
+      // console.log("here");
+      // console.log(texts);
+      // return texts
+      //   .slice(1)[0]
+      //   .trim()
+      //   .split(" ")
+      //   .slice(1)
+      //   .join(" ")
+      //   .replace(/\+/g, "\\+");
+      return "test";
+    };
+
     let wholeCard = document.querySelectorAll(".cardOutline.result");
 
     console.log("test");
     const toArray = Array.from(wholeCard, (e) => {
       let titleDOM = e.querySelector("span[title]");
+
+      console.log(
+        e
+          .querySelector("span.date")
+          .innerText.trim()
+          .split(" ")
+          .slice(1)
+          .join(" ")
+      );
 
       return {
         title: titleDOM.innerHTML.replace(/[^a-zA-Z0-9]/g, " "),
@@ -75,6 +163,13 @@ async function run(location, remote, distance) {
         location: e
           .querySelector("div.companyLocation")
           .innerText.replace(/[^a-zA-Z0-9]/g, " "),
+        date: e
+          .querySelector("span.date")
+          .innerText.trim()
+          .replace(/\n/g, " ")
+          .split(" ")
+          .slice(1)
+          .join(" "),
       };
     });
     return toArray;

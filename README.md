@@ -9,3 +9,10 @@ Due to the nature of web scraping supporting multiple users adds a lot of comple
 ## future goals:
 
 - change this to allow for a cron job deployment.
+
+## new update
+
+- allows for notifications for up to 3 searches.
+- search string for specific job added
+- added a date of specific job post
+- cancelling and editing job searches

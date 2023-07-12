@@ -4,6 +4,7 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
 const { disconnect } = require("process");
+require("dotenv").config();
 
 let oldJSON = {
   data: [
@@ -65,7 +66,19 @@ function titleInArray(title, jsonData) {
 // };
 
 async function run(location, remote, distance, searchString) {
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "single-process",
+      "--no-zygote",
+    ],
+    executablePath:
+      process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
+    headless: "new",
+  });
   const page = await browser.newPage();
   // page.on("console", (msg) => console.log(msg.text()));
   page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));

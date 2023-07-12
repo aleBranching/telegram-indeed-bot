@@ -107,7 +107,7 @@ const contactDataWizard = new Scenes.WizardScene(
     ctx.reply(
       "Thank you for filling the form to start it type /search <search number> \nto cancel it type /cancel <search number> \nto preview querry parameters type /params"
     );
-    ctx.wizard.searchData.isActive = "false";
+    ctx.wizard.state.searchData.isActive = "false";
     querryContext[ctx.wizard.state.querryIndex] = ctx.wizard.state.searchData;
     // useQuerriedDataSearch(ctx);
     return ctx.scene.leave();

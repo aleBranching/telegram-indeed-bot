@@ -155,36 +155,52 @@ async function run(location, remote, distance, searchString) {
     let wholeCard = document.querySelectorAll(".cardOutline.result");
 
     console.log("test");
+
     const toArray = Array.from(wholeCard, (e) => {
       let titleDOM = e.querySelector("span[title]");
 
-      console.log(
-        e
-          .querySelector("span.date")
-          .innerText.trim()
-          .split(" ")
-          .slice(1)
-          .join(" ")
-      );
+      // console.log(
+      //   e
+      //     .querySelector("span.date")
+      //     .innerText.trim()
+      //     .split(" ")
+      //     .slice(1)
+      //     .join(" ")
+      // );
+
+      let tryGetText = (callbackFN) => {
+        try {
+          return callbackFN();
+        } catch (error) {
+          return "failed to scrape text";
+        }
+      };
 
       return {
         title: titleDOM.innerHTML.replace(/[^a-zA-Z0-9]/g, " "),
         link: titleDOM.parentElement.href,
-        company: e
-          .querySelector("span.companyName")
-          .innerText.replace(/[^a-zA-Z0-9]/g, " "),
-        location: e
-          .querySelector("div.companyLocation")
-          .innerText.replace(/[^a-zA-Z0-9]/g, " "),
-        date: e
-          .querySelector("span.date")
-          .innerText.trim()
-          .replace(/\n/g, " ")
-          .split(" ")
-          .slice(1)
-          .join(" "),
+        company: tryGetText(() =>
+          e
+            .querySelector("span.companyName")
+            .innerText.replace(/[^a-zA-Z0-9]/g, " ")
+        ),
+        location: tryGetText(() =>
+          e
+            .querySelector("div.companyLocation")
+            .innerText.replace(/[^a-zA-Z0-9]/g, " ")
+        ),
+        date: tryGetText(() =>
+          e
+            .querySelector("span.date")
+            .innerText.trim()
+            .replace(/\n/g, " ")
+            .split(" ")
+            .slice(1)
+            .join(" ")
+        ),
       };
     });
+
     return toArray;
   });
 
@@ -198,6 +214,7 @@ async function run(location, remote, distance, searchString) {
     return;
   }
 
+  console.log(newPosts);
   oldJSON.data = oldJSON.data.concat(jobtxt);
 
   await browser.close();

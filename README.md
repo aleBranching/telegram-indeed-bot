@@ -6,12 +6,17 @@ After the initial search of jobs based on user criteria any new jobs are sent as
 
 Due to the nature of web scraping supporting multiple users adds a lot of complexity. Through building this I have already run into instances of being temporarily blocked by indeed. It is best to deploy it yourself or run a local instance on an old machine 24/7. A VPN is recommended to be used.
 
+### deployment
+
+railway.app was used to deploy this. It can be easily deployed as there is a dockerfile to allow for support of puppeteer. Two environment variables are needed. The SERVER_URL which can be found after deployment and generating a domain and BOT_TOKEN which is gotten from thebotfather in telegram.
+
 ### local dev environment:
-  - run `npm install` to install dependencies.
-  - on the terminal run `ngrok http 5000` install ngrok if you don't already have it. This will alow you to forward telegram post requests from a public url to local host.
-  - copy the link generated and paste it into SERVER_URL variable in a `.env` file.
-  - aquire a bot token from telegram paste it into BOT_TOKEN variable in the `.env` file
-  - run `npm run dev`
+
+- run `npm install` to install dependencies.
+- on the terminal run `ngrok http 5000` install ngrok if you don't already have it. This will alow you to forward telegram post requests from a public url to local host.
+- copy the link generated and paste it into SERVER_URL variable in a `.env` file.
+- aquire a bot token from telegram paste it into BOT_TOKEN variable in the `.env` file
+- run `npm run dev`
 
 ## future goals:
 

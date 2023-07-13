@@ -149,7 +149,7 @@ bot.hears(searchRegex, (ctx) => {
 
 const cancelationRegex = new RegExp(/cancel (.+)/i);
 bot.hears(cancelationRegex, (ctx) => {
-  let querryIndex = Number(ctx.match[1]);
+  let querryIndex = Number(ctx.match[1]) - 1;
   if (querryIndex < 0 || querryIndex > 3) {
     ctx.reply("can be 1, 2 or 3");
   }
@@ -165,7 +165,7 @@ bot.hears(cancelationRegex, (ctx) => {
 let useQuerriedDataSearch = async (ctx, index) => {
   let resultString = `Your search with querry ${index + 1} ${JSONtoNiceText(
     querryContext[index]
-  )}`;
+  )}\n`;
   let text = await returnListenerText(querryContext[index]);
   text.forEach((e) => {
     resultString += `\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${e.location}\nDate: ${e.date}

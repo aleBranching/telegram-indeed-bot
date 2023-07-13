@@ -155,7 +155,7 @@ bot.hears(cancelationRegex, (ctx) => {
   }
 
   clearInterval(querryContext[querryIndex].intervalID);
-  querryContext[querryIndex].isActive = false;
+  querryContext[querryIndex] = { text: "search is unfilled", isActive: false };
   ctx.reply(`cancelled querry ${JSONtoNiceText(querryContext[querryIndex])}}`);
 });
 
@@ -168,12 +168,7 @@ let useQuerriedDataSearch = async (ctx, index) => {
   )}`;
   let text = await returnListenerText(querryContext[index]);
   text.forEach((e) => {
-    resultString += `
-        Title: [${e.title}](${e.link})
-        Company: ${e.company}
-        Location: ${e.location}
-        Date: ${e.date}
-        
+    resultString += `\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${e.location}\nDate: ${e.date}
         `;
   });
   ctx.replyWithMarkdownV2(resultString);
@@ -191,11 +186,11 @@ let useQuerriedDataSearch = async (ctx, index) => {
     let result = await returnListenerText(querryContext[index]);
     if (typeof result !== "undefined") {
       result.forEach((e) => {
-        let message = `Your search with querry${index}
-                Title: [${e.title}](${e.link})
-                Company: ${e.company}
-                Location: ${e.location}
-
+        let message = `Your search with querry${index + 2}${JSONtoNiceText(
+          querryContext[index]
+        )}\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${
+          e.location
+        }
                 `;
         bot.telegram.sendMessage(querryContext.chat_id, message, {
           parse_mode: "MarkdownV2",

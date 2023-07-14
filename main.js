@@ -163,15 +163,23 @@ bot.hears(cancelationRegex, (ctx) => {
 
 // bot.hears("/test", ())
 let useQuerriedDataSearch = async (ctx, index) => {
-  let resultString = `Your search with querry ${index + 1} ${JSONtoNiceText(
-    querryContext[index]
-  )}\n`;
-  let text = await returnListenerText(querryContext[index]);
-  text.forEach((e) => {
-    resultString += `\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${e.location}\nDate: ${e.date}
-        `;
-  });
-  ctx.replyWithMarkdownV2(resultString);
+  if (!"error" in result) {
+    let resultString = `Your search with querry ${index + 1} ${JSONtoNiceText(
+      querryContext[index]
+    )}\n`;
+    let text = await returnListenerText(querryContext[index]);
+    text.forEach((e) => {
+      resultString += `\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${e.location}\nDate: ${e.date}
+          `;
+    });
+    ctx.replyWithMarkdownV2(resultString);
+  } else {
+    let errorMessage = result.error;
+    let text =
+      "*There was an error*\n" + toMarkdownV2({ errorMessage, entities: [] });
+
+    ctx.replyWithMarkdownV2(text);
+  }
 
   let minuteFrequency = 10;
 
@@ -185,17 +193,27 @@ let useQuerriedDataSearch = async (ctx, index) => {
   let intervalID = setInterval(async () => {
     let result = await returnListenerText(querryContext[index]);
     if (typeof result !== "undefined") {
-      result.forEach((e) => {
-        let message = `Your search with querry${index + 2}${JSONtoNiceText(
-          querryContext[index]
-        )}\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${
-          e.location
-        }
-                `;
-        bot.telegram.sendMessage(querryContext.chat_id, message, {
+      if (!"error" in result) {
+        result.forEach((e) => {
+          let message = `Your search with querry${index + 2}${JSONtoNiceText(
+            querryContext[index]
+          )}\nTitle: [${e.title}](${e.link})\nCompany: ${
+            e.company
+          }\nLocation: ${e.location}
+                  `;
+          bot.telegram.sendMessage(querryContext.chat_id, message, {
+            parse_mode: "MarkdownV2",
+          });
+        });
+      } else {
+        let errorMessage = result.error;
+        let text =
+          "*There was an error*\n" +
+          toMarkdownV2({ errorMessage, entities: [] });
+        bot.telegram.sendMessage(querryContext.chat_id, text, {
           parse_mode: "MarkdownV2",
         });
-      });
+      }
     }
   }, minuteFrequency * 60 * 1000);
   querryContext[index].intervalID = intervalID;

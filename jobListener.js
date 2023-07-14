@@ -66,160 +66,164 @@ function titleInArray(title, jsonData) {
 // };
 
 async function run(location, remote, distance, searchString) {
-  const browser = await puppeteer.launch({
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "single-process",
-      "--no-zygote",
-    ],
-    executablePath:
-      process.env.NODE_ENV === "production"
-        ? process.env.PUPPETEER_EXECUTABLE_PATH
-        : puppeteer.executablePath(),
-    headless: "new",
-  });
-  const page = await browser.newPage();
-  // page.on("console", (msg) => console.log(msg.text()));
-  page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
-  // page.on("console", async (msg) => {
-  //   const args = await msg.args();
-  //   args.forEach(async (arg) => {
-  //     const val = await arg.jsonValue();
-  //     // value is serializable
-  //     if (JSON.stringify(val) !== JSON.stringify({})) console.log(val);
-  //     // value is unserializable (or an empty oject)
-  //     // else {
-  //     //   const { type, subtype, description } = arg._remoteObject;
-  //     //   console.log(
-  //     //     `type: ${type}, subtype: ${subtype}, description:\n ${description}`
-  //     //   );
-  //     // }
-  //   });
-  // });
+  try {
+    const browser = await puppeteer.launch({
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "single-process",
+        "--no-zygote",
+      ],
+      executablePath:
+        process.env.NODE_ENV === "production"
+          ? process.env.PUPPETEER_EXECUTABLE_PATH
+          : puppeteer.executablePath(),
+      headless: "new",
+    });
+    const page = await browser.newPage();
+    // page.on("console", (msg) => console.log(msg.text()));
+    page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
+    // page.on("console", async (msg) => {
+    //   const args = await msg.args();
+    //   args.forEach(async (arg) => {
+    //     const val = await arg.jsonValue();
+    //     // value is serializable
+    //     if (JSON.stringify(val) !== JSON.stringify({})) console.log(val);
+    //     // value is unserializable (or an empty oject)
+    //     // else {
+    //     //   const { type, subtype, description } = arg._remoteObject;
+    //     //   console.log(
+    //     //     `type: ${type}, subtype: ${subtype}, description:\n ${description}`
+    //     //   );
+    //     // }
+    //   });
+    // });
 
-  let indeedURL;
-  if (searchString == "false") {
+    let indeedURL;
+    if (searchString == "false") {
+      if (distance == "25" && remote == "true") {
+        indeedURL = `https://uk.indeed.com/jobs?l=${location}&sc=0kf%253Aattr(DSQF7)%253B&sort=date`;
+      }
+      if (remote == "true") {
+        indeedURL = `https://uk.indeed.com/jobs?l=${location}&sc=0kf%3Aattr%28DSQF7%29%3B&radius=${distance}&sort=date`;
+      }
+      if (remote == "false") {
+        indeedURL = `https://uk.indeed.com/jobs?l=${location}&radius=${distance}&sort=date`;
+      }
+    }
+
+    let ammendedSearchString = searchString.split(" ").join("+");
     if (distance == "25" && remote == "true") {
-      indeedURL = `https://uk.indeed.com/jobs?l=${location}&sc=0kf%253Aattr(DSQF7)%253B&sort=date`;
+      indeedURL = `https://uk.indeed.com/jobs?q=${ammendedSearchString}&l=${location}&sc=0kf%253Aattr(DSQF7)%253B&sort=date`;
     }
     if (remote == "true") {
-      indeedURL = `https://uk.indeed.com/jobs?l=${location}&sc=0kf%3Aattr%28DSQF7%29%3B&radius=${distance}&sort=date`;
+      indeedURL = `https://uk.indeed.com/jobs?q=${ammendedSearchString}&l=${location}&sc=0kf%3Aattr%28DSQF7%29%3B&radius=${distance}&sort=date`;
     }
     if (remote == "false") {
-      indeedURL = `https://uk.indeed.com/jobs?l=${location}&radius=${distance}&sort=date`;
+      indeedURL = `https://uk.indeed.com/jobs?q=${ammendedSearchString}&l=${location}&radius=${distance}&sort=date`;
     }
-  }
 
-  let ammendedSearchString = searchString.split(" ").join("+");
-  if (distance == "25" && remote == "true") {
-    indeedURL = `https://uk.indeed.com/jobs?q=${ammendedSearchString}&l=${location}&sc=0kf%253Aattr(DSQF7)%253B&sort=date`;
-  }
-  if (remote == "true") {
-    indeedURL = `https://uk.indeed.com/jobs?q=${ammendedSearchString}&l=${location}&sc=0kf%3Aattr%28DSQF7%29%3B&radius=${distance}&sort=date`;
-  }
-  if (remote == "false") {
-    indeedURL = `https://uk.indeed.com/jobs?q=${ammendedSearchString}&l=${location}&radius=${distance}&sort=date`;
-  }
+    console.log("THE url", indeedURL);
 
-  console.log("THE url", indeedURL);
+    await page.goto(indeedURL);
 
-  await page.goto(indeedURL);
+    const jobtxt = await page.evaluate(() => {
+      let innerInnerText = (element) => {
+        console.log(element);
+        child = element.firstChild;
+        texts = [];
 
-  const jobtxt = await page.evaluate(() => {
-    let innerInnerText = (element) => {
-      console.log(element);
-      child = element.firstChild;
-      texts = [];
-
-      while (child) {
-        if (child.nodeType == 3) {
-          texts.push(child.data);
+        while (child) {
+          if (child.nodeType == 3) {
+            texts.push(child.data);
+          }
+          child = child.nextSibling;
         }
-        child = child.nextSibling;
-      }
 
-      // while at first an elegant solution was attempted a tired got work the next day brain has decided this monstrosity to make sense to do
-      // console.log("here");
-      // console.log(texts);
-      // return texts
-      //   .slice(1)[0]
-      //   .trim()
-      //   .split(" ")
-      //   .slice(1)
-      //   .join(" ")
-      //   .replace(/\+/g, "\\+");
-      return "test";
-    };
-
-    let wholeCard = document.querySelectorAll(".cardOutline.result");
-
-    console.log("test");
-
-    const toArray = Array.from(wholeCard, (e) => {
-      let titleDOM = e.querySelector("span[title]");
-
-      // console.log(
-      //   e
-      //     .querySelector("span.date")
-      //     .innerText.trim()
-      //     .split(" ")
-      //     .slice(1)
-      //     .join(" ")
-      // );
-
-      let tryGetText = (callbackFN) => {
-        try {
-          return callbackFN();
-        } catch (error) {
-          return "failed to scrape text";
-        }
+        // while at first an elegant solution was attempted a tired got work the next day brain has decided this monstrosity to make sense to do
+        // console.log("here");
+        // console.log(texts);
+        // return texts
+        //   .slice(1)[0]
+        //   .trim()
+        //   .split(" ")
+        //   .slice(1)
+        //   .join(" ")
+        //   .replace(/\+/g, "\\+");
+        return "test";
       };
 
-      return {
-        title: titleDOM.innerHTML.replace(/[^a-zA-Z0-9]/g, " "),
-        link: titleDOM.parentElement.href,
-        company: tryGetText(() =>
-          e
-            .querySelector("span.companyName")
-            .innerText.replace(/[^a-zA-Z0-9]/g, " ")
-        ),
-        location: tryGetText(() =>
-          e
-            .querySelector("div.companyLocation")
-            .innerText.replace(/[^a-zA-Z0-9]/g, " ")
-        ),
-        date: tryGetText(() =>
-          e
-            .querySelector("span.date")
-            .innerText.trim()
-            .replace(/\n/g, " ")
-            .split(" ")
-            .slice(1)
-            .join(" ")
-        ),
-      };
+      let wholeCard = document.querySelectorAll(".cardOutline.result");
+
+      console.log("test");
+
+      const toArray = Array.from(wholeCard, (e) => {
+        let titleDOM = e.querySelector("span[title]");
+
+        // console.log(
+        //   e
+        //     .querySelector("span.date")
+        //     .innerText.trim()
+        //     .split(" ")
+        //     .slice(1)
+        //     .join(" ")
+        // );
+
+        let tryGetText = (callbackFN) => {
+          try {
+            return callbackFN();
+          } catch (error) {
+            return "failed to scrape text";
+          }
+        };
+
+        return {
+          title: titleDOM.innerHTML.replace(/[^a-zA-Z0-9]/g, " "),
+          link: titleDOM.parentElement.href,
+          company: tryGetText(() =>
+            e
+              .querySelector("span.companyName")
+              .innerText.replace(/[^a-zA-Z0-9]/g, " ")
+          ),
+          location: tryGetText(() =>
+            e
+              .querySelector("div.companyLocation")
+              .innerText.replace(/[^a-zA-Z0-9]/g, " ")
+          ),
+          date: tryGetText(() =>
+            e
+              .querySelector("span.date")
+              .innerText.trim()
+              .replace(/\n/g, " ")
+              .split(" ")
+              .slice(1)
+              .join(" ")
+          ),
+        };
+      });
+
+      return toArray;
     });
 
-    return toArray;
-  });
+    let newResult = { data: jobtxt, searchedAt: new Date().toLocaleString() };
 
-  let newResult = { data: jobtxt, searchedAt: new Date().toLocaleString() };
+    let newPosts = newResultsFinder(newResult, oldJSON);
 
-  let newPosts = newResultsFinder(newResult, oldJSON);
+    if (newPosts.length == 0) {
+      console.log("no new jobs found");
+      await browser.close();
+      return;
+    }
 
-  if (newPosts.length == 0) {
-    console.log("no new jobs found");
+    console.log(newPosts);
+    oldJSON.data = oldJSON.data.concat(jobtxt);
+
     await browser.close();
-    return;
+
+    return newPosts;
+  } catch (error) {
+    return { error: error };
   }
-
-  console.log(newPosts);
-  oldJSON.data = oldJSON.data.concat(jobtxt);
-
-  await browser.close();
-
-  return newPosts;
 }
 
 module.exports = run;

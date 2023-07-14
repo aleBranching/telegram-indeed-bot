@@ -13,6 +13,11 @@ const WEBHOOK_URL = SERVER_URL + URI;
 
 const bot = new Telegraf(BOT_TOKEN);
 bot.use(Telegraf.log());
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+}
 
 bot.use(session());
 let querryContext = [
@@ -174,13 +179,13 @@ let useQuerriedDataSearch = async (ctx, index) => {
   });
   ctx.replyWithMarkdownV2(resultString);
 
-  let minuteFrequency = 16;
+  let minuteFrequency = getRandomInt(16, 20);
 
   if (index == 1) {
-    minuteFrequency = 19;
+    minuteFrequency = getRandomInt(21, 27);
   }
   if (index == 2) {
-    30;
+    getRandomInt(28, 35);
   }
 
   let intervalID = setInterval(async () => {

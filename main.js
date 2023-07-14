@@ -167,19 +167,12 @@ let useQuerriedDataSearch = async (ctx, index) => {
     querryContext[index]
   )}\n`;
   let text = await returnListenerText(querryContext[index]);
-  if (!"error" in text) {
-    text.forEach((e) => {
-      resultString += `\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${e.location}\nDate: ${e.date}
-          `;
-    });
-    ctx.replyWithMarkdownV2(resultString);
-  } else {
-    let errorMessage = result.error;
-    let text =
-      "*There was an error*\n" + toMarkdownV2({ errorMessage, entities: [] });
 
-    ctx.replyWithMarkdownV2(text);
-  }
+  text.forEach((e) => {
+    resultString += `\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${e.location}\nDate: ${e.date}
+          `;
+  });
+  ctx.replyWithMarkdownV2(resultString);
 
   let minuteFrequency = 10;
 

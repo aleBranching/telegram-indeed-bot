@@ -195,9 +195,9 @@ let useQuerriedDataSearch = async (ctx, index) => {
     if (typeof result !== "undefined") {
       if (!"error" in result) {
         result.forEach((e) => {
-          let message = `Your search with querry${index + 2}${JSONtoNiceText(
+          let message = `Your search with querry${index + 1}${JSONtoNiceText(
             querryContext[index]
-          )}\nTitle: [${e.title}](${e.link})\nCompany: ${
+          )}\n\nTitle: [${e.title}](${e.link})\nCompany: ${
             e.company
           }\nLocation: ${e.location}
                   `;

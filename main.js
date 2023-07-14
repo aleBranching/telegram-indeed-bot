@@ -174,13 +174,13 @@ let useQuerriedDataSearch = async (ctx, index) => {
   });
   ctx.replyWithMarkdownV2(resultString);
 
-  let minuteFrequency = 10;
+  let minuteFrequency = 16;
 
   if (index == 1) {
-    minuteFrequency = 12;
+    minuteFrequency = 19;
   }
   if (index == 2) {
-    14;
+    30;
   }
 
   let intervalID = setInterval(async () => {

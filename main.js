@@ -163,11 +163,11 @@ bot.hears(cancelationRegex, (ctx) => {
 
 // bot.hears("/test", ())
 let useQuerriedDataSearch = async (ctx, index) => {
-  if (!"error" in result) {
-    let resultString = `Your search with querry ${index + 1} ${JSONtoNiceText(
-      querryContext[index]
-    )}\n`;
-    let text = await returnListenerText(querryContext[index]);
+  let resultString = `Your search with querry ${index + 1} ${JSONtoNiceText(
+    querryContext[index]
+  )}\n`;
+  let text = await returnListenerText(querryContext[index]);
+  if (!"error" in text) {
     text.forEach((e) => {
       resultString += `\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${e.location}\nDate: ${e.date}
           `;

@@ -180,17 +180,17 @@ let useQuerriedDataSearch = async (ctx, index) => {
   ctx.replyWithMarkdownV2(resultString);
 
   console.log("the index:", index);
-  // let minuteFrequency = getRandomInt(16, 20);
-  let minuteFrequency = 2;
+  let minuteFrequency = getRandomInt(16, 20);
+  // let minuteFrequency = 2;
 
   if (index == 1) {
-    // minuteFrequency = getRandomInt(21, 27);
-    minuteFrequency = 4;
+    minuteFrequency = getRandomInt(21, 27);
+    // minuteFrequency = 4;
   }
   if (index == 2) {
     // getRandomInt(28, 35);
-    // minuteFrequency = getRandomInt(28, 35);
-    minuteFrequency = 6;
+    minuteFrequency = getRandomInt(28, 35);
+    // minuteFrequency = 6;
   }
 
   let intervalID = setInterval(async () => {

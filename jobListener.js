@@ -173,6 +173,7 @@ async function run(location, remote, distance, searchString) {
           try {
             return callbackFN();
           } catch (error) {
+            console.log("the failed to scrape text occured");
             return "failed to scrape text";
           }
         };
@@ -220,9 +221,10 @@ async function run(location, remote, distance, searchString) {
 
     await browser.close();
 
-    return newPosts;
+    return [newPosts, null];
   } catch (error) {
-    return { error: error };
+    console.log("the error message:", error);
+    return [null, error];
   }
 }
 

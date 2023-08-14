@@ -171,7 +171,7 @@ let useQuerriedDataSearch = async (ctx, index) => {
   let resultString = `Your search with querry ${index + 1} ${JSONtoNiceText(
     querryContext[index]
   )}\n`;
-  let text = await returnListenerText(querryContext[index]);
+  let [text, error] = await returnListenerText(querryContext[index]);
 
   text.forEach((e) => {
     resultString += `\nTitle: [${e.title}](${e.link})\nCompany: ${e.company}\nLocation: ${e.location}\nDate: ${e.date}
@@ -179,31 +179,25 @@ let useQuerriedDataSearch = async (ctx, index) => {
   });
   ctx.replyWithMarkdownV2(resultString);
 
-  let minuteFrequency = getRandomInt(16, 20);
+  console.log("the index:", index);
+  // let minuteFrequency = getRandomInt(16, 20);
+  let minuteFrequency = 2;
 
   if (index == 1) {
-    minuteFrequency = getRandomInt(21, 27);
+    // minuteFrequency = getRandomInt(21, 27);
+    minuteFrequency = 4;
   }
   if (index == 2) {
-    getRandomInt(28, 35);
+    // getRandomInt(28, 35);
+    // minuteFrequency = getRandomInt(28, 35);
+    minuteFrequency = 6;
   }
 
   let intervalID = setInterval(async () => {
-    let result = await returnListenerText(querryContext[index]);
+    let [result, error] = await returnListenerText(querryContext[index]);
+    console.log("the result:", result);
     if (typeof result !== "undefined") {
-      if (!"error" in result) {
-        result.forEach((e) => {
-          let message = `Your search with querry${index + 1}${JSONtoNiceText(
-            querryContext[index]
-          )}\n\nTitle: [${e.title}](${e.link})\nCompany: ${
-            e.company
-          }\nLocation: ${e.location}
-                  `;
-          bot.telegram.sendMessage(querryContext.chat_id, message, {
-            parse_mode: "MarkdownV2",
-          });
-        });
-      } else {
+      if (error) {
         let errorMessage = result.error;
         let text =
           "*There was an error*\n" +
@@ -212,6 +206,17 @@ let useQuerriedDataSearch = async (ctx, index) => {
           parse_mode: "MarkdownV2",
         });
       }
+      result.forEach((e) => {
+        let message = `Your search with querry${index + 1}${JSONtoNiceText(
+          querryContext[index]
+        )}\n\nTitle: [${e.title}](${e.link})\nCompany: ${
+          e.company
+        }\nLocation: ${e.location}
+                `;
+        bot.telegram.sendMessage(querryContext.chat_id, message, {
+          parse_mode: "MarkdownV2",
+        });
+      });
     }
   }, minuteFrequency * 60 * 1000);
   querryContext[index].intervalID = intervalID;
@@ -227,6 +232,7 @@ bot.hears("see", (ctx) => {
 });
 
 bot.start((ctx) => {
+  console.log("the chatID:", ctx.update.message.chat.id);
   querryContext.chat_id = ctx.update.message.chat.id;
 
   console.log("HERE");

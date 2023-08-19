@@ -196,8 +196,10 @@ let useQuerriedDataSearch = async (ctx, index) => {
   let intervalID = setInterval(async () => {
     let [result, error] = await returnListenerText(querryContext[index]);
     console.log("the result:", result);
+    console.log("the error obj:", error);
+    
     if (typeof result !== "undefined") {
-      if (error) {
+      if (error != null ) {
         let errorMessage = result.error;
         let text =
           "*There was an error*\n" +
